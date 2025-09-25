@@ -1,0 +1,1 @@
+# STAR Library - Mini Project
