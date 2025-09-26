@@ -1,39 +1,62 @@
 // frontend/src/components/BookCard.jsx
 import React from 'react';
 
-export const BookCard = ({ book }) => {
-    // Safely access author name - handle both object and string cases
-    const getAuthorName = () => {
-        if (!book.author) return "Unknown Author";
-        if (typeof book.author === 'string') return book.author;
-        return book.author.name || "Unknown Author";
-    };
-
+export const BookCard = ({ book, onClick, className = "", style }) => {
     const stars = '⭐'.repeat(Math.round(book.rating || 4));
     
+    console.log( "Book: ", book );
     return (
-        <div className="bg-white/85 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg p-4 h-full flex flex-col transition-transform hover:scale-105 hover:shadow-xl">
-            <div className="flex items-start justify-between mb-3">
-                <span className="text-yellow-500 text-sm">{stars}</span>
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                    {book.readers_count || 0} readers
-                </span>
+        <div
+            onClick={onClick}
+            className={`book-card glass-card rounded-2xl shadow-lg p-4 flex flex-col cursor-pointer ${className}`}
+            style={style}
+        >
+            {/* Book Cover */}
+            <div className="mb-3 w-full h-48 overflow-hidden rounded-xl">
+                <img 
+                    src={book.cover_image_url || '/assets/cover_placeholder.jpg'} 
+                    alt={book.title} 
+                    className="w-full h-full object-cover"
+                />
             </div>
-            
-            <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
-                {book.title || "Untitled Book"}
-            </h3>
-            
-            <p className="text-sm text-gray-600 mb-3">by {getAuthorName()}</p>
-            
-            <div className="mt-auto space-y-2">
-                <div className="flex justify-between text-xs text-gray-500">
-                    <span>📖 {book.pages || 'N/A'} pages</span>
-                    <span>🏷️ {book.genre || 'Unknown'}</span>
-                </div>
+
+            {/* Rating */}
+            <div className="flex items-center justify-start mb-2 space-x-2 text-yellow-500 font-medium">
+                <span>{stars}</span>
+                <span className="text-gray-600 text-sm">({book.rating?.toFixed(1) || 4})</span>
+            </div>
+
+            <hr className="border-gray-200 mb-2" />
+
+            {/* Title & Author */}
+            <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{book.title}</h3>
+            <p className="text-sm text-gray-500 mb-3">by {book.author?.name || "Unknown Author"}</p>
+
+            {/* Stats from hardcoded DB values */}
+            <div className="flex justify-between text-xs text-gray-500 mb-3">
+                <span>📊 {book.readers_count} readers</span>
+                <span>📖 {book.pages} pages</span>
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 mb-3">
+                <span>🏷️ {book.genre}</span>
+                <span>⏱️ {book.reading_time}h read</span>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-2 mt-auto">
+                <button 
+                    className="flex-1 bg-blue-700 text-white py-1 rounded-lg hover:bg-blue-800 text-sm"
+                    onClick={(e) => { e.stopPropagation(); /* Add to library handler */ }}
+                >
+                    Add to Library
+                </button>
+                <button 
+                    className="flex-1 border border-blue-700 text-blue-700 py-1 rounded-lg hover:bg-blue-100 text-sm"
+                    onClick={(e) => { e.stopPropagation(); onClick(book); }}
+                >
+                    Quick Preview
+                </button>
             </div>
         </div>
     );
 };
-
-export default BookCard;

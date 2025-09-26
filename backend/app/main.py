@@ -41,18 +41,6 @@ def get_dashboard(reader_id: int, db: Session = Depends(get_db)):
     most_popular_books = db.query(Book).order_by(Book.id.desc()).limit(5).all()
     user_books = reader.books_read  # list of Book objects
 
-    # most_popular_books_data = [
-    #     {
-    #         "id": b.id,
-    #         "title": b.title,
-    #         "author": b.author.name,
-    #     }
-    #     for b in most_popular_books
-    # ]
-
-    # print("most popular books:", most_popular_books_data)
-
-
     top_authors = {}
     for book in user_books:
         top_authors[book.author] = top_authors.get(book.author, 0) + 1
@@ -72,6 +60,14 @@ def get_dashboard(reader_id: int, db: Session = Depends(get_db)):
             {
                 "id": b.id,
                 "title": b.title,
+                "description": b.description,
+                "pages": b.pages,
+                "genre": b.genre,
+                "published_year": b.published_year,
+                "readers_count": getattr(b, "readers_count", 0),
+                "reading_time": getattr(b, "reading_time", 0),
+                "cover_image_url": b.cover_image_url,
+                "rating": getattr(b, "rating", 0),
                 "author": {
                     "id": b.author.id,
                     "name": b.author.name,

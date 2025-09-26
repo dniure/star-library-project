@@ -16,6 +16,10 @@ module.exports = {
           900: '#1a237e',
         }
       },
+      fontFamily: {
+        playfair: ['"Playfair Display"', 'serif'],
+        inter: ['Inter', 'sans-serif'],
+      },
       backdropBlur: {
         xs: '2px',
       }

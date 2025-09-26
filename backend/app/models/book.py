@@ -23,6 +23,10 @@ class Book(Base):
     published_year = Column(Integer)
     cover_image_url = Column(String)
 
+    readers_count = Column(Integer, default=0)
+    reading_time = Column(Integer, default=0)
+    rating = Column(Integer, default=4)
+
     author_id = Column(Integer, ForeignKey("authors.id"))
     author = relationship("Author", back_populates="books")
     readers = relationship("Reader", secondary=book_readers, back_populates="books_read")
