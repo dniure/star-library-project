@@ -8,8 +8,6 @@ The goal is to demonstrate the ability to design and build a complete system wit
 - Integration of frontend with backend
 ---
 
----
-
 ## 📂 Project Structure
 
 ```plaintext
