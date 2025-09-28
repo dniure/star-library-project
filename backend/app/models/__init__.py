@@ -1,19 +1,20 @@
-# backend/app/models/__init__.py
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime
 from sqlalchemy.orm import relationship, declarative_base
-from datetime import datetime
+from datetime import datetime, timezone
 
 Base = declarative_base()
 
-# Many-to-many association table
+# --- Many-to-Many Association Table ---
 book_readers = Table(
     "book_readers",
     Base.metadata,
     Column("book_id", Integer, ForeignKey("books.id")),
     Column("reader_id", Integer, ForeignKey("readers.id")),
-    Column("read_at", DateTime, default=datetime.utcnow),
+    Column("read_at", DateTime, default=lambda: datetime.now(timezone.utc)),
 )
 
+
+# --- Author Model ---
 class Author(Base):
     __tablename__ = "authors"
 
@@ -23,9 +24,11 @@ class Author(Base):
     birth_date = Column(String)
     nationality = Column(String)
 
+    # Relationship to books
     books = relationship("Book", back_populates="author")
 
 
+# --- Book Model ---
 class Book(Base):
     __tablename__ = "books"
 
@@ -46,6 +49,7 @@ class Book(Base):
     readers = relationship("Reader", secondary=book_readers, back_populates="books_read")
 
 
+# --- Reader Model ---
 class Reader(Base):
     __tablename__ = "readers"
 
@@ -55,4 +59,5 @@ class Reader(Base):
     join_date = Column(DateTime, default=datetime.utcnow)
     favorite_genre = Column(String)
 
+    # Relationship to books
     books_read = relationship("Book", secondary=book_readers, back_populates="readers")

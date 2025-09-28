@@ -1,26 +1,30 @@
-# backend/app/database.py
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from .models import Base
 
-# SQLite database URL
-SQLALCHEMY_DATABASE_URL = "sqlite:///./starlibrary.db"
+# --- Constants ---
+SQLALCHEMY_DATABASE_URL = "sqlite:///./starlibrary.db"  # Could later move to env variable
 
-# Create engine
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+# --- Engine & Session ---
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False}  # SQLite specific
+)
 
-# Create session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+# --- Helper Functions ---
 def create_tables():
-    """Create database tables from models."""
+    """Create all database tables defined in models."""
     Base.metadata.create_all(bind=engine)
 
 
 def get_db():
-    """Dependency that provides a database session."""
+    """
+    Dependency for FastAPI routes.
+    Provides a database session and ensures proper cleanup.
+    """
     db = SessionLocal()
     try:
         yield db

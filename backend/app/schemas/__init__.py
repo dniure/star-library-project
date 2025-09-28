@@ -1,9 +1,10 @@
-# backend/app/schemas/__init__.py
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
-# Author Schemas
+# ----------------------
+# --- Author Schemas ---
+# ----------------------
 class AuthorBase(BaseModel):
     name: str
     bio: Optional[str] = None
@@ -11,17 +12,22 @@ class AuthorBase(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class AuthorCreate(AuthorBase):
     pass
 
+
 class Author(AuthorBase):
     id: int
-    books_count: Optional[int] = None  
-    total_readers: Optional[int] = None
+    books_count: Optional[int] = 0
+    total_readers: Optional[int] = 0
 
     model_config = {"from_attributes": True}
 
-# Book Schemas
+
+# ----------------------
+# --- Book Schemas ---
+# ----------------------
 class BookBase(BaseModel):
     title: str
     description: Optional[str] = None
@@ -29,8 +35,10 @@ class BookBase(BaseModel):
     genre: str
     published_year: int
 
+
 class BookCreate(BookBase):
     author_id: int
+
 
 class Book(BookBase):
     id: int
@@ -41,29 +49,37 @@ class Book(BookBase):
     author: Author
 
     model_config = {"from_attributes": True}
-    
-# Reader Schemas
+
+
+# ----------------------
+# --- Reader Schemas ---
+# ----------------------
 class ReaderBase(BaseModel):
     name: str
     email: str
     favorite_genre: Optional[str] = None
 
+
 class ReaderCreate(ReaderBase):
     pass
+
 
 class Reader(ReaderBase):
     id: int
     join_date: datetime
-    books_read_count: Optional[int] = None 
-    books_read: Optional[List[Book]] = []   # relationship: books the reader read
+    books_read_count: Optional[int] = 0
+    books_read: Optional[List[Book]] = []
 
     model_config = {"from_attributes": True}
 
-# Dashboard Schema
+
+# ----------------------
+# --- Dashboard Schema ---
+# ----------------------
 class DashboardStats(BaseModel):
     reader_id: int
     most_popular_books: List[Book]
-    most_popular_author: Author
+    most_popular_author: Optional[Author] = None
     books_read: List[Book]
     user_top_authors: List[Author]
 

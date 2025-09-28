@@ -1,21 +1,18 @@
-## seed.py
-
 from sqlalchemy import insert
 from .database import SessionLocal
-from .models import Book, Author, Reader
+from .models import Book, Author, Reader, book_readers
 import logging
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 def seed_database():
+    """Seed the database with initial authors, books, readers, and relationships."""
     db = SessionLocal()
     try:
         if db.query(Author).count() > 0:
             logger.info("Database already seeded. Skipping...")
             return
-
-        logger.info("Database already seeded. Skipping...")
 
         # --- Authors ---
         authors = [
@@ -37,19 +34,9 @@ def seed_database():
                 published_year=1997,
                 readers_count=1200,
                 reading_time=7,
-                description="Harry discovers he is a wizard and attends Hogwarts School of Witchcraft and Wizardry, beginning a journey full of magic, friendship, and danger."
+                description="Harry discovers he is a wizard and attends Hogwarts School of Witchcraft and Wizardry..."
             ),
-            Book(
-                title="Harry Potter and the Chamber of Secrets",
-                genre="Fantasy",
-                pages=251,
-                author_id=authors[0].id,
-                published_year=1998,
-                readers_count=1150,
-                reading_time=8,
-                description="Harry returns to Hogwarts and must uncover the mystery behind a hidden chamber threatening the students with petrification."
-            ),
-            # ... (keep the rest of your book objects here unchanged)
+            # Add other books here...
         ]
         db.bulk_save_objects(books)
         db.flush()
@@ -65,23 +52,23 @@ def seed_database():
         db.bulk_save_objects(readers)
         db.flush()
 
-        # --- Book-Reader Relationships ---
-        reading_relationships = []
-        for book in books[:8]:
-            reading_relationships.append({"book_id": book.id, "reader_id": readers[0].id})
+        # --- Relationships ---
+        relationships = []
+        for i, book in enumerate(books[:8]):
+            relationships.append({"book_id": book.id, "reader_id": readers[0].id})
         for book in books[12:15]:
-            reading_relationships.append({"book_id": book.id, "reader_id": readers[1].id})
+            relationships.append({"book_id": book.id, "reader_id": readers[1].id})
         for book in books[8:12]:
-            reading_relationships.append({"book_id": book.id, "reader_id": readers[2].id})
+            relationships.append({"book_id": book.id, "reader_id": readers[2].id})
         for idx in [0, 4, 9]:
-            reading_relationships.append({"book_id": books[idx].id, "reader_id": readers[3].id})
+            relationships.append({"book_id": books[idx].id, "reader_id": readers[3].id})
         for book in books[12:15]:
-            reading_relationships.append({"book_id": book.id, "reader_id": readers[4].id})
+            relationships.append({"book_id": book.id, "reader_id": readers[4].id})
 
-        db.execute(insert(book_readers), reading_relationships)
+        db.execute(insert(book_readers), relationships)
         db.commit()
 
-        logger.info("Database seeded successfully with realistic data!")
+        logger.info("Database seeded successfully!")
 
     except Exception as e:
         db.rollback()
