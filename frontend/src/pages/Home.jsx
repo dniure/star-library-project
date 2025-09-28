@@ -1,11 +1,13 @@
 // frontend/src/pages/Home.jsx
 import React, { useState } from "react";
 import { useDashboard } from "../hooks/useDashboard";
+import { Header, LoadingSpinner } from "../components/UIComponents";
+import { BookGrid, BookModal } from "../components/BooksSection";
 import { Dashboard } from "../components/Dashboard";
-import { BookGrid } from "../components/BookGrid";
-import { LoadingSpinner } from "../components/ui/LoadingSpinner";
-import { Header } from "../components/ui/Header";
-import { BookModal } from "../components/BookModal";
+
+
+// UIComponents.jsx
+
 
 export const Home = () => {
     const { dashboardData, loading, error } = useDashboard(1);

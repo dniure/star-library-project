@@ -1,5 +1,5 @@
 // frontend/src/components/Dashboard.jsx
-import { StatCard } from './StatCard';
+import { StatCard } from './UIComponents';
 
 export const Dashboard = ({ data }) => {
     if (!data) return null;

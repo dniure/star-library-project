@@ -7,9 +7,7 @@ from collections import Counter
 
 from ..database import get_db, create_tables
 from .. import schemas, crud, models
-from ..models import Reader, Book
 from ..seed import seed_database
-
 
 app = FastAPI(title="STAR Library API", version="1.0.0")
 
@@ -32,16 +30,10 @@ def read_root():
     return {"message": "STAR Library API"}
 
 @app.get("/health")
-def health_check(db: Session = Depends(get_db)):
-    try:
-        db.execute("SELECT 1")
-        db_status = "connected"
-    except SQLAlchemyError:
-        db_status = "error"
+def health_check():
+    return {"status": "ok", "message": "API is alive"}
 
-    return {"status": "healthy", "database": db_status}
-
-# Dashboard route with debug print
+# Dashboard route
 @app.get("/dashboard/{reader_id}", response_model=schemas.DashboardStats)
 def get_dashboard(reader_id: int, db: Session = Depends(get_db)):
     reader = crud.get_reader_by_id(db, reader_id)

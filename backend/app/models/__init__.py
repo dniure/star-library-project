@@ -1,8 +1,58 @@
 # backend/app/models/__init__.py
+from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime
+from sqlalchemy.orm import relationship, declarative_base
+from datetime import datetime
 
-from .base import Base
-from .author import Author
-from .book import Book, book_readers
-from .reader import Reader
+Base = declarative_base()
 
-__all__ = ["Base", "Author", "Book", "Reader", "book_readers"]
+# Many-to-many association table
+book_readers = Table(
+    "book_readers",
+    Base.metadata,
+    Column("book_id", Integer, ForeignKey("books.id")),
+    Column("reader_id", Integer, ForeignKey("readers.id")),
+    Column("read_at", DateTime, default=datetime.utcnow),
+)
+
+class Author(Base):
+    __tablename__ = "authors"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, nullable=False)
+    bio = Column(String)
+    birth_date = Column(String)
+    nationality = Column(String)
+
+    books = relationship("Book", back_populates="author")
+
+
+class Book(Base):
+    __tablename__ = "books"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True, nullable=False)
+    description = Column(String)
+    genre = Column(String)
+    pages = Column(Integer)
+    published_year = Column(Integer)
+    cover_image_url = Column(String)
+
+    readers_count = Column(Integer, default=0)
+    reading_time = Column(Integer, default=0)
+    rating = Column(Integer, default=4)
+
+    author_id = Column(Integer, ForeignKey("authors.id"))
+    author = relationship("Author", back_populates="books")
+    readers = relationship("Reader", secondary=book_readers, back_populates="books_read")
+
+
+class Reader(Base):
+    __tablename__ = "readers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True)
+    join_date = Column(DateTime, default=datetime.utcnow)
+    favorite_genre = Column(String)
+
+    books_read = relationship("Book", secondary=book_readers, back_populates="readers")

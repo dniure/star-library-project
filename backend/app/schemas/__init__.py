@@ -3,9 +3,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
-# ------------------------
 # Author Schemas
-# ------------------------
 class AuthorBase(BaseModel):
     name: str
     bio: Optional[str] = None
@@ -18,15 +16,12 @@ class AuthorCreate(AuthorBase):
 
 class Author(AuthorBase):
     id: int
-    books_count: Optional[int] = None   # computed dynamically
-    total_readers: Optional[int] = None # computed dynamically
+    books_count: Optional[int] = None  
+    total_readers: Optional[int] = None
 
     model_config = {"from_attributes": True}
 
-
-# ------------------------
 # Book Schemas
-# ------------------------
 class BookBase(BaseModel):
     title: str
     description: Optional[str] = None
@@ -46,10 +41,8 @@ class Book(BookBase):
     author: Author
 
     model_config = {"from_attributes": True}
-
-# ------------------------
+    
 # Reader Schemas
-# ------------------------
 class ReaderBase(BaseModel):
     name: str
     email: str
@@ -61,15 +54,12 @@ class ReaderCreate(ReaderBase):
 class Reader(ReaderBase):
     id: int
     join_date: datetime
-    books_read_count: Optional[int] = None  # computed dynamically
+    books_read_count: Optional[int] = None 
     books_read: Optional[List[Book]] = []   # relationship: books the reader read
 
     model_config = {"from_attributes": True}
 
-
-# ------------------------
 # Dashboard Schema
-# ------------------------
 class DashboardStats(BaseModel):
     reader_id: int
     most_popular_books: List[Book]

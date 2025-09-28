@@ -2,7 +2,7 @@
 
 from sqlalchemy import insert
 from .database import SessionLocal
-from .models import Author, Book, Reader
+from .models import Book, Author, Reader
 import logging
 
 logger = logging.getLogger(__name__)
