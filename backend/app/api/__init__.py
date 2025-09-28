@@ -7,8 +7,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from os import environ
-
-from typing import List, Optional
+from typing import List
 import logging
 
 from ..database import get_db, create_tables

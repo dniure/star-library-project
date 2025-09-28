@@ -1,8 +1,15 @@
-// src/App.jsx
-import React from 'react';
-import { Home } from './pages/Home';
-import { AppProvider } from './context/AppContext';
-import './styles/globals.css';
+/**
+ * App.jsx
+ * ----------------
+ * Root app component.
+ * - Wraps the app in AppProvider (context)
+ * - Renders Home page
+ */
+
+import React from "react";
+import { AppProvider } from "./context/AppContext";
+import Home from "./pages/Home";
+import "./styles/globals.css";
 
 function App() {
     return (

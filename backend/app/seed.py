@@ -36,7 +36,6 @@ def seed_database():
                 reading_time=7,
                 description="Harry discovers he is a wizard and attends Hogwarts School of Witchcraft and Wizardry..."
             ),
-            # Add other books here...
         ]
         db.bulk_save_objects(books)
         db.flush()

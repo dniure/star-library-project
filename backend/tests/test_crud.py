@@ -2,10 +2,13 @@
 
 from app import crud, models
 
+# -------------------------------
+# CRUD Layer Tests
+# -------------------------------
+
 def test_get_most_popular_books(db):
     books = crud.get_most_popular_books(db)
     assert len(books) > 0
-    # Book 1 should be more popular (has 1 reader) than book 2 (has 0 readers)
     assert books[0].id == 1
     assert books[0].readers_count >= 0
 
@@ -13,14 +16,12 @@ def test_get_most_popular_author(db):
     author = crud.get_most_popular_author(db)
     assert author is not None
     assert hasattr(author, "books")
-    # J.K. Rowling should be more popular (has book with reader)
     assert author.name == "J.K. Rowling"
 
 def test_get_reader_top_authors(db):
     top_authors = crud.get_reader_top_authors(db, reader_id=1)
     assert len(top_authors) > 0
     assert all(isinstance(a, models.Author) for a in top_authors)
-    # Reader 1 has read books by J.K. Rowling
     assert top_authors[0].name == "J.K. Rowling"
 
 def test_get_books(db):
@@ -39,5 +40,5 @@ def test_get_authors(db):
 def test_get_reader_with_stats(db):
     reader = crud.get_reader_with_stats(db, reader_id=1)
     assert reader is not None
-    assert reader.books_read_count == 1  # Reader 1 has read 1 book
+    assert reader.books_read_count == 1
     assert reader.name == "Alice"

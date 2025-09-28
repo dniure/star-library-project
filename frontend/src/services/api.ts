@@ -1,6 +1,22 @@
-// frontend/src/services/api.ts
+/**
+ * api.ts
+ * ----------------
+ * Singleton API service for:
+ * - Dashboard
+ * - Books
+ * - Authors
+ * - Reader info
+ */
 
-// Define types for API responses
+export interface Author {
+  id: number;
+  name: string;
+  bio?: string;
+  nationality?: string;
+  books_count?: number;
+  total_readers?: number;
+}
+
 export interface Book {
   id: number;
   title: string;
@@ -10,15 +26,6 @@ export interface Book {
   published_year?: number;
   author: Author;
   readers_count?: number;
-}
-
-export interface Author {
-  id: number;
-  name: string;
-  bio?: string;
-  nationality?: string;
-  books_count?: number;
-  total_readers?: number;
 }
 
 export interface Reader {
@@ -33,71 +40,48 @@ export interface Reader {
 export interface DashboardStats {
   most_popular_books: Book[];
   most_popular_author: Author;
-  books_read: number;
+  books_read: Book[];
   user_top_authors: Author[];
 }
 
-// Request options interface
 interface RequestOptions extends RequestInit {
   headers?: Record<string, string>;
 }
 
 class ApiService {
-  private baseURL: string;
-
-  constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-  }
+  private baseURL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
   private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    
-    const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    };
-
     try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      return await response.json() as T;
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        headers: { "Content-Type": "application/json", ...options.headers },
+        ...options,
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      return (await response.json()) as T;
     } catch (error) {
-      console.error('API request failed:', error);
-      
-      // Handle unknown error type safely
-      if (error instanceof Error) {
-        throw new Error(`Failed to fetch data: ${error.message}`);
-      } else {
-        throw new Error('Failed to fetch data: Unknown error occurred');
-      }
+      console.error("API request failed:", error);
+      throw error instanceof Error ? new Error(`Failed to fetch data: ${error.message}`) : new Error("Unknown error occurred");
     }
   }
 
-  async fetchDashboardData(readerId: number = 1): Promise<DashboardStats> {
+  fetchDashboardData(readerId = 1) {
     return this.request<DashboardStats>(`/dashboard/${readerId}`);
   }
 
-  async fetchBooks(skip: number = 0, limit: number = 100): Promise<Book[]> {
+  fetchBooks(skip = 0, limit = 100) {
     return this.request<Book[]>(`/books/?skip=${skip}&limit=${limit}`);
   }
 
-  async fetchAuthors(): Promise<Author[]> {
-    return this.request<Author[]>('/authors/');
+  fetchAuthors() {
+    return this.request<Author[]>("/authors/");
   }
 
-  async fetchReader(readerId: number): Promise<Reader> {
+  fetchReader(readerId: number) {
     return this.request<Reader>(`/readers/${readerId}`);
   }
 }
 
-// Create singleton instance
 export const apiService = new ApiService();
-
 export default ApiService;

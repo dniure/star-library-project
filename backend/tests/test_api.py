@@ -1,10 +1,13 @@
 # backend/tests/test_api.py
 
+# -------------------------------
+# API Endpoint Tests
+# -------------------------------
+
 def test_root(client):
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    # Updated to match the new API response format
     assert data["message"] == "STAR Library API"
     assert data["version"] == "1.0.0"
     assert data["status"] == "running"
@@ -13,7 +16,6 @@ def test_health(client):
     response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
-    # Updated to match the new health check response
     assert data["status"] == "healthy"
     assert "database" in data
     assert data["database"] in ["connected", "disconnected"]
@@ -23,7 +25,6 @@ def test_get_books(client):
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
-    assert "title" in data[0]
     assert data[0]["title"] == "HP and the Sorcerer's Stone"
 
 def test_get_authors(client):
@@ -31,7 +32,6 @@ def test_get_authors(client):
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
-    assert "name" in data[0]
     assert data[0]["name"] == "J.K. Rowling"
 
 def test_get_reader(client):
