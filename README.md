@@ -112,7 +112,7 @@ In Terminal 1, start the backend:
 ```bash
 cd backend
 source venv/bin/activate  # or venv\Scripts\activate on Windows
-uvicorn app.main:app --reload
+uvicorn app.api:app --reload --port 8000
 ```
 
 In Terminal 2, start the frontend:

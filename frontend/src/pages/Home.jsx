@@ -11,7 +11,6 @@ export const Home = () => {
     const { dashboardData, loading, error } = useDashboard(1);
     const [selectedBook, setSelectedBook] = useState(null);
 
-
     if (loading) {
         return (
         <div className="flex items-center justify-center min-h-screen">
@@ -38,19 +37,19 @@ export const Home = () => {
 
     return (
         <div className="container mx-auto px-4 pt-20 pb-8">
-            <Header userName="Emily" />
+            <Header userName="James" />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Dashboard Container — no hover */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Dashboard Container */}
             <div className="lg:col-span-1 glass no-hover p-6 rounded-xl">
                 <Dashboard data={dashboardData} />
             </div>
 
-            {/* Book Grid Container — no hover on wrapper */}
+            {/* Book Grid Container */}
             <div className="lg:col-span-2 glass no-hover p-6 rounded-xl">
                 <BookGrid 
                 books={dashboardData?.most_popular_books} 
-                loading={loading} 
+                loading={loading}
                 onBookClick={setSelectedBook}
                 />
             </div>

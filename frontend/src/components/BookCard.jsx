@@ -1,14 +1,12 @@
 // frontend/src/components/BookCard.jsx
-import React from 'react';
 
-export const BookCard = ({ book, onClick, className = "", style }) => {
+export const BookCard = ({ book, onClick, className, style }) => {
     const stars = '⭐'.repeat(Math.round(book.rating || 4));
-    
-    console.log( "Book: ", book );
+    // console.log("book: ", book)
     return (
         <div
             onClick={onClick}
-            className={`book-card glass-card rounded-2xl shadow-lg p-4 flex flex-col cursor-pointer ${className}`}
+            className={`book-card glass rounded-2xl shadow-lg p-4 flex flex-col cursor-pointer ${className}`}
             style={style}
         >
             {/* Book Cover */}
@@ -32,7 +30,7 @@ export const BookCard = ({ book, onClick, className = "", style }) => {
             <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{book.title}</h3>
             <p className="text-sm text-gray-500 mb-3">by {book.author?.name || "Unknown Author"}</p>
 
-            {/* Stats from hardcoded DB values */}
+            {/* Book Stats */}
             <div className="flex justify-between text-xs text-gray-500 mb-3">
                 <span>📊 {book.readers_count} readers</span>
                 <span>📖 {book.pages} pages</span>
@@ -46,7 +44,7 @@ export const BookCard = ({ book, onClick, className = "", style }) => {
             <div className="flex gap-2 mt-auto">
                 <button 
                     className="flex-1 bg-blue-700 text-white py-1 rounded-lg hover:bg-blue-800 text-sm"
-                    onClick={(e) => { e.stopPropagation(); /* Add to library handler */ }}
+                    onClick={(e) => { e.stopPropagation()}}
                 >
                     Add to Library
                 </button>

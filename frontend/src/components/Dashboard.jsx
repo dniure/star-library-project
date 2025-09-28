@@ -1,5 +1,4 @@
 // frontend/src/components/Dashboard.jsx
-import React from 'react';
 import { StatCard } from './StatCard';
 
 export const Dashboard = ({ data }) => {
@@ -36,7 +35,7 @@ export const Dashboard = ({ data }) => {
                     <div className="flex justify-between">
                         <span>Books Read:</span>
                         <span className="font-semibold text-green-600">
-                            {data.user_books_read_count?.length || 0}
+                            {data.books_read?.length || 0}
                         </span>
                     </div>
                     <div className="flex justify-between">

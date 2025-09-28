@@ -299,7 +299,7 @@ export const AppProvider = ({ children }) => {
       if (!state.dashboardData) return null;
       
       return {
-        booksRead: state.dashboardData.user_books_read_count,
+        booksRead: state.dashboardData.books_read,
         topAuthors: state.dashboardData.user_top_authors?.length || 0,
         favoriteGenre: state.currentUser?.favoriteGenre || 'Unknown',
       };

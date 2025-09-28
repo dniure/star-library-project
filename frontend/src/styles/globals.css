@@ -35,7 +35,7 @@ h1, h2, h3, .logo {
 }
 
 .book-card:hover {
-  transform: translateY(-8px) scale(1.02) !important;
+  transform: translateY(-8px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 

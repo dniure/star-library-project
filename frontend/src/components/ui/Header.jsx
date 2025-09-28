@@ -1,7 +1,7 @@
 // src/components/ui/Header.jsx
 import React from "react";
 
-export const Header = ({ userName = "Emily" }) => {
+export const Header = ({ userName }) => {
   return (
     <header className="fixed top-0 left-0 right-0 w-full z-50 bg-[#090f52] h-16 flex justify-between items-center px-8 shadow-md">
       {/* Logo */}

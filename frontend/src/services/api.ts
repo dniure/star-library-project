@@ -33,7 +33,7 @@ export interface Reader {
 export interface DashboardStats {
   most_popular_books: Book[];
   most_popular_author: Author;
-  user_books_read_count: number;
+  books_read: number;
   user_top_authors: Author[];
 }
 
