@@ -1,3 +1,10 @@
+"""
+seed.py
+-------------------
+Standalone utility function to populate the database with initial, test data.
+Manually manages session lifecycle (create/commit/close).
+"""
+
 from sqlalchemy import insert
 from .database import SessionLocal
 from .models import Book, Author, Reader, book_readers
@@ -8,13 +15,15 @@ logging.basicConfig(level=logging.INFO)
 
 def seed_database():
     """Seed the database with initial authors, books, readers, and relationships."""
+    # Create a session manually for this single, long-running task
     db = SessionLocal()
     try:
+        # Check if any Author exists to prevent re-seeding
         if db.query(Author).count() > 0:
             logger.info("Database already seeded. Skipping...")
             return
 
-        # --- Authors ---
+        # Authors: Bulk insert authors
         authors = [
             Author(name="J.K. Rowling", bio="British author best known for Harry Potter", nationality="British"),
             Author(name="Brandon Sanderson", bio="American fantasy and science fiction writer", nationality="American"),
@@ -22,14 +31,15 @@ def seed_database():
             Author(name="Agatha Christie", bio="English writer known for detective novels", nationality="British"),
         ]
         db.bulk_save_objects(authors)
-        db.flush()
+        db.flush() # Flush to get generated Author IDs
 
-        # --- Books ---
+        # Books: Bulk insert books
         books = [
             Book(
                 title="Harry Potter and the Philosopher's Stone",
                 genre="Fantasy",
                 pages=223,
+                # Use the ID obtained from the flush above
                 author_id=authors[0].id,
                 published_year=1997,
                 readers_count=1200,
@@ -38,9 +48,9 @@ def seed_database():
             ),
         ]
         db.bulk_save_objects(books)
-        db.flush()
+        db.flush() # Flush to get generated Book IDs
 
-        # --- Readers ---
+        # Readers: Bulk insert readers
         readers = [
             Reader(name="James Bernhardt", email="james.bernhardt@subtera.tech", favorite_genre="Sci-Fi"),
             Reader(name="Michael Chen", email="michael@email.com", favorite_genre="Mystery"),
@@ -51,27 +61,36 @@ def seed_database():
         db.bulk_save_objects(readers)
         db.flush()
 
-        # --- Relationships ---
+        # Relationships: Define the many-to-many associations (who read what)
         relationships = []
-        for i, book in enumerate(books[:8]):
+
+        # Assigns the first 8 books to the first reader.
+        for book in books[:8]:
             relationships.append({"book_id": book.id, "reader_id": readers[0].id})
-        for book in books[12:15]:
-            relationships.append({"book_id": book.id, "reader_id": readers[1].id})
+        # Assigns books at indices 8, 9, 10, and 11 to the third reader.
         for book in books[8:12]:
             relationships.append({"book_id": book.id, "reader_id": readers[2].id})
+        # Assigns books at indices 12, 13, and 14 to the second reader.
+        for book in books[12:15]:
+            relationships.append({"book_id": book.id, "reader_id": readers[1].id})
+        # Assigns three specific books (at indices 0, 4, 9) to the fourth reader.
         for idx in [0, 4, 9]:
             relationships.append({"book_id": books[idx].id, "reader_id": readers[3].id})
+        # Assigns books at indices 12, 13, and 14 to the fifth reader.
         for book in books[12:15]:
             relationships.append({"book_id": book.id, "reader_id": readers[4].id})
 
+        # Bulk insert all relationships using a single execute command
         db.execute(insert(book_readers), relationships)
         db.commit()
 
         logger.info("Database seeded successfully!")
 
     except Exception as e:
+        # Ensure transaction is rolled back on any error
         db.rollback()
         logger.error(f"Error seeding database: {e}", exc_info=True)
         raise
     finally:
+        # Crucial step: close the manually created session
         db.close()

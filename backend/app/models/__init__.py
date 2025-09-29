@@ -1,10 +1,17 @@
+"""
+models.py
+-------------------
+Defines the SQL database schema using SQLAlchemy ORM.
+All classes inherit from Base and map directly to database tables.
+"""
+
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime
 from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime, timezone
 
 Base = declarative_base()
 
-# --- Many-to-Many Association Table ---
+# Many-to-Many Association Table
 book_readers = Table(
     "book_readers",
     Base.metadata,
@@ -14,7 +21,7 @@ book_readers = Table(
 )
 
 
-# --- Author Model ---
+# Author Model (One-to-Many relationship with Books)
 class Author(Base):
     __tablename__ = "authors"
 
@@ -24,11 +31,11 @@ class Author(Base):
     birth_date = Column(String)
     nationality = Column(String)
 
-    # Relationship to books
+    # Relationship to books (list of Book objects)
     books = relationship("Book", back_populates="author")
 
 
-# --- Book Model ---
+# Book Model (Many-to-One with Author, Many-to-Many with Reader)
 class Book(Base):
     __tablename__ = "books"
 
@@ -40,16 +47,20 @@ class Book(Base):
     published_year = Column(Integer)
     cover_image_url = Column(String)
 
+    # Temporary/Calculated fields for ORM use
     readers_count = Column(Integer, default=0)
     reading_time = Column(Integer, default=0)
     rating = Column(Integer, default=4)
 
+    # Foreign Key to Author
     author_id = Column(Integer, ForeignKey("authors.id"))
     author = relationship("Author", back_populates="books")
+    
+    # Many-to-Many relationship to Reader via book_readers table
     readers = relationship("Reader", secondary=book_readers, back_populates="books_read")
 
 
-# --- Reader Model ---
+# Reader Model (Many-to-Many relationship with Book)
 class Reader(Base):
     __tablename__ = "readers"
 
@@ -59,5 +70,5 @@ class Reader(Base):
     join_date = Column(DateTime, default=datetime.utcnow)
     favorite_genre = Column(String)
 
-    # Relationship to books
+    # Many-to-Many relationship to Book via book_readers table
     books_read = relationship("Book", secondary=book_readers, back_populates="readers")

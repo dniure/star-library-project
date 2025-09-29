@@ -1,4 +1,9 @@
-# backend/app/api/__init__.py
+"""
+__init__.py
+-------------------
+Primary FastAPI application file.
+Defines global config, middleware (CORS), exception handlers, and all core API routes.
+"""
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, status
@@ -23,15 +28,15 @@ async def lifespan(app: FastAPI):
     Lifespan context manager for application startup and shutdown events.
     Replaces the deprecated @app.on_event decorator.
     """
-    # Startup
+    # Startup: Initialize DB and seed data unless in testing environment
     logger.info("Starting up STAR Library API...")
     if environ.get("TESTING_ENV") != "True":
         try:
             create_tables()
             seed_database()
-            logger.info("✅ Database initialized successfully")
+            logger.info(" ✅ Database initialized successfully")
         except Exception as e:
-            logger.error(f"❌ Database initialization failed: {e}")
+            logger.error(f" ❌ Database initialization failed: {e}")
             raise
     else:
         logger.info("Skipping production DB setup in TESTING_ENV.")
@@ -48,7 +53,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# --- CORS Middleware ---
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Frontend URL
@@ -57,10 +62,12 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-# --- Root & Health Check ---
+# Root & Health Check Endpoints
 @app.get("/", tags=["Root"], response_model=dict)
 def read_root():
-    """Root endpoint returning API information."""
+    """
+    Root endpoint returning API information.
+    """
     return {
         "message": "STAR Library API",
         "version": "1.0.0",
@@ -73,7 +80,7 @@ def health_check(db: Session = Depends(get_db)):
     Health check endpoint to verify API and database connectivity.
     """
     try:
-        # Test database connection
+        # Test database connection with a minimal query
         db.execute("SELECT 1")
         db_status = "connected"
     except SQLAlchemyError as e:
@@ -83,10 +90,10 @@ def health_check(db: Session = Depends(get_db)):
     return {
         "status": "healthy", 
         "database": db_status,
-        "timestamp": "2024-01-01T00:00:00Z"  # You might want to use actual timestamp
+        "timestamp": "2024-01-01T00:00:00Z"
     }
 
-# --- Dashboard Route ---
+# Dashboard Route
 @app.get(
     "/dashboard/{reader_id}", 
     response_model=schemas.DashboardStats, 
@@ -96,7 +103,7 @@ def health_check(db: Session = Depends(get_db)):
 )
 def get_dashboard(reader_id: int, db: Session = Depends(get_db)):
     """Fetch dashboard stats for a reader."""
-    # Validate reader_id
+    # Validate reader_id is a positive integer
     if reader_id <= 0:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -104,6 +111,7 @@ def get_dashboard(reader_id: int, db: Session = Depends(get_db)):
         )
     
     reader = crud.get_reader_by_id(db, reader_id)
+    # Check if reader exists
     if not reader:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -111,26 +119,29 @@ def get_dashboard(reader_id: int, db: Session = Depends(get_db)):
         )
 
     try:
+        # Fetch necessary data from CRUD functions
         most_popular_books = crud.get_most_popular_books(db)
-        top_authors = crud.get_reader_top_authors(db, reader_id)
+        reader_top_authors = crud.get_reader_top_authors(db, reader_id)
         
-        most_popular_author = top_authors[0] if top_authors else None
+        most_popular_author = reader_top_authors[0] if reader_top_authors else None
 
+        # Explicitly construct the response schema (DashboardStats)
         return schemas.DashboardStats(
             reader_id=reader.id,
             most_popular_books=most_popular_books,
             most_popular_author=most_popular_author,
             books_read=reader.books_read,
-            user_top_authors=top_authors
+            reader_top_authors=reader_top_authors
         )
     except Exception as e:
+        # Log error with context before raising HTTPException
         logger.error(f"Error fetching dashboard for reader {reader_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while fetching dashboard data"
         )
 
-# --- Books Endpoint ---
+# Books Endpoint
 @app.get(
     "/books/", 
     response_model=List[schemas.Book], 
@@ -158,6 +169,7 @@ def get_books(
         )
     
     try:
+        # Return CRUD result; FastAPI handles schema conversion
         return crud.get_books(db, skip=skip, limit=limit)
     except Exception as e:
         logger.error(f"Error fetching books (skip={skip}, limit={limit}): {e}")
@@ -166,7 +178,7 @@ def get_books(
             detail="Internal server error while fetching books"
         )
 
-# --- Authors Endpoint ---
+# Authors Endpoint
 @app.get(
     "/authors/", 
     response_model=List[schemas.Author], 
@@ -185,7 +197,7 @@ def get_authors(db: Session = Depends(get_db)):
             detail="Internal server error while fetching authors"
         )
 
-# --- Reader Endpoint ---
+# Reader Endpoint
 @app.get(
     "/readers/{reader_id}", 
     response_model=schemas.Reader, 
@@ -203,19 +215,22 @@ def get_reader(reader_id: int, db: Session = Depends(get_db)):
         )
     
     reader = crud.get_reader_with_stats(db, reader_id)
+    # Check if reader was found
     if not reader:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Reader with ID {reader_id} not found"
         )
     
+    # Reader object already has computed stats attached
     return reader
 
-# --- Exception Handlers ---
+# Exception Handlers
 @app.exception_handler(SQLAlchemyError)
 async def sqlalchemy_exception_handler(request, exc):
     """Handle SQLAlchemy database errors."""
     logger.error(f"Database error: {exc}")
+    # Return a standardized 500 error for database issues
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Database error occurred"}
@@ -225,12 +240,13 @@ async def sqlalchemy_exception_handler(request, exc):
 async def internal_server_error_handler(request, exc):
     """Handle generic internal server errors."""
     logger.error(f"Internal server error: {exc}")
+    # Return a standardized 500 error for all uncaught exceptions
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Internal server error"}
     )
 
-# --- Add OpenAPI tags metadata ---
+# Add OpenAPI tags metadata
 tags_metadata = [
     {
         "name": "Root",
@@ -254,5 +270,5 @@ tags_metadata = [
     },
 ]
 
-# Update app with tags metadata
+# Update app with tags metadata for Swagger UI organization
 app.openapi_tags = tags_metadata
