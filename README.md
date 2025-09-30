@@ -42,7 +42,7 @@ star-library-project/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/<your-username>/star-library-project.git
+git clone https://github.com/dniure/star-library-project.git
 cd star-library-project
 ```
 
@@ -55,7 +55,7 @@ cd star-library-project
 
 2.  **Create virtual environment**
     ```bash
-    python -m venv venv
+    pytho3 -m venv venv
     ```
     **Activate it:**
     * **Mac/Linux**
@@ -74,13 +74,10 @@ cd star-library-project
 
 4.  **Start the Server**
     ```bash
-    uvicorn app.main:app --reload
+    uvicorn app.api:app --reload
     ```
     Backend will be available at:
-    👉 **http://127.0.0.1:8000**
-    
-    Interactive API docs (Swagger UI):
-    👉 **http://127.0.0.1:8000/docs**
+    👉 **http://localhost:8000/**
 
 ---
 
@@ -101,24 +98,3 @@ cd star-library-project
     ```
     Frontend will be available at:
     👉 **http://localhost:3000**
-
----
-
-## 🚀 Running the Project
-To run the full-stack application, open two separate terminals.
-
-In Terminal 1, start the backend:
-
-```bash
-cd backend
-source venv/bin/activate  # or venv\Scripts\activate on Windows
-uvicorn app.api:app --reload --port 8000
-```
-
-In Terminal 2, start the frontend:
-
-```bash
-cd frontend
-npm start
-```
-Now, open your web browser and navigate to 👉 http://localhost:3000 to view the frontend, which will be fetching data from the backend running at 👉 http://127.0.0.1:8000.

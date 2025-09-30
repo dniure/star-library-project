@@ -1,67 +1,59 @@
 """
-models.py
--------------------
-Defines the SQL database schema using SQLAlchemy ORM.
-All classes inherit from Base and map directly to database tables.
+Database Models (SQLAlchemy ORM)
+Defines database schema and relationships between entities.
 """
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime
 from sqlalchemy.orm import relationship, declarative_base
-from datetime import datetime, timezone
+from datetime import datetime
 
 Base = declarative_base()
 
-# Many-to-Many Association Table
+# Association table for many-to-many relationship between books and readers
 book_readers = Table(
     "book_readers",
     Base.metadata,
-    Column("book_id", Integer, ForeignKey("books.id")),
-    Column("reader_id", Integer, ForeignKey("readers.id")),
-    Column("read_at", DateTime, default=lambda: datetime.now(timezone.utc)),
+    Column("book_id", Integer, ForeignKey("books.id"), primary_key=True),
+    Column("reader_id", Integer, ForeignKey("readers.id"), primary_key=True),
+    Column("read_at", DateTime, default=datetime.utcnow),  # Track reading timestamps
 )
 
-
-# Author Model (One-to-Many relationship with Books)
 class Author(Base):
+    """Author entity representing book writers with biographical information."""
     __tablename__ = "authors"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
-    bio = Column(String)
-    birth_date = Column(String)
+    bio = Column(String)  # Author biography
+    birth_date = Column(String)  # Could be Date type in production
     nationality = Column(String)
 
-    # Relationship to books (list of Book objects)
+    # Relationship: Author has many Books
     books = relationship("Book", back_populates="author")
 
-
-# Book Model (Many-to-One with Author, Many-to-Many with Reader)
 class Book(Base):
+    """Book entity representing published works with metadata."""
     __tablename__ = "books"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True, nullable=False)
-    description = Column(String)
-    genre = Column(String)
+    description = Column(String)  # Book synopsis
+    genre = Column(String)  # Fiction, Fantasy, Mystery, etc.
     pages = Column(Integer)
     published_year = Column(Integer)
-    cover_image_url = Column(String)
-
-    # Temporary/Calculated fields for ORM use
-    readers_count = Column(Integer, default=0)
-    reading_time = Column(Integer, default=0)
-    rating = Column(Integer, default=4)
-
-    # Foreign Key to Author
-    author_id = Column(Integer, ForeignKey("authors.id"))
-    author = relationship("Author", back_populates="books")
+    cover_image_url = Column(String)  # URL to book cover image
+    reading_time = Column(Integer, default=0)  # Estimated reading time in hours
+    rating = Column(Integer, default=4)  # Average user rating
     
-    # Many-to-Many relationship to Reader via book_readers table
+    # Foreign key relationship to Author
+    author_id = Column(Integer, ForeignKey("authors.id"))
+    
+    # Relationships
+    author = relationship("Author", back_populates="books")
     readers = relationship("Reader", secondary=book_readers, back_populates="books_read")
 
-
-# Reader Model (Many-to-Many relationship with Book)
 class Reader(Base):
+    """Reader entity representing library users with reading preferences."""
     __tablename__ = "readers"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -70,5 +62,5 @@ class Reader(Base):
     join_date = Column(DateTime, default=datetime.utcnow)
     favorite_genre = Column(String)
 
-    # Many-to-Many relationship to Book via book_readers table
+    # Many-to-many relationship with Books through book_readers
     books_read = relationship("Book", secondary=book_readers, back_populates="readers")

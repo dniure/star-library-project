@@ -67,7 +67,7 @@ class ApiService {
   }
 
   fetchDashboardData() {
-    return this.request<DashboardStats>(`/dashboard`);
+    return this.request<DashboardStats>(`/dashboardData`);
   }
 
   fetchBooks(skip = 0, limit = 100) {

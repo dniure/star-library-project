@@ -11,18 +11,28 @@ import { StatCard } from "./UIComponents";
 
 const Dashboard = ({ data }) => {
     if (!data) return null;
-    
-    console.log("top authors: ", data.user_top_authors)
 
     return (
         <div className="space-y-6">
             {/* Most Popular Author */}
             <StatCard title="Most Popular Author" icon="👑">
-                <div className="text-center">
-                    <div className="text-4xl mb-2">📚</div>
-                    <h4 className="font-bold text-gray-900 text-lg">{(data.most_popular_author?.name || "Unknown")}</h4>
-                    <p className="text-gray-600">{data.most_popular_author?.total_readers || 0} readers</p>
-                    <p className="text-sm text-gray-500 mt-1">{data.most_popular_author?.books_count || 0} books</p>
+                <div className="text-center">               
+                    <h4 className="font-bold text-gray-900 text-lg mb-1">
+                        {data.most_popular_author?.name || "No data available"}
+                    </h4>
+                    {data.most_popular_author?.bio && (
+                        <p className="text-sm text-gray-500 mb-2 line-clamp-2">
+                            {data.most_popular_author.bio}
+                        </p>
+                    )}
+                    <div className="flex justify-center gap-4 text-sm">
+                        <span className="text-gray-600">
+                            👥 {data.most_popular_author?.total_readers?.toLocaleString() || 0}
+                        </span>
+                        <span className="text-gray-600">
+                            📚 {data.most_popular_author?.books_count || 0}
+                        </span>
+                    </div>
                 </div>
             </StatCard>
 
@@ -31,7 +41,7 @@ const Dashboard = ({ data }) => {
                 <div className="space-y-3">
                     <div className="flex justify-between">
                         <span>Books Read:</span>
-                        <span className="font-semibold text-green-600">{data.books_read?.length || 0}</span>
+                        <span className="font-semibold text-green-600">{data.user_books_read?.length || 0}</span>
                     </div>
                     <div className="flex justify-between">
                         <span>Avg Rating:</span>
