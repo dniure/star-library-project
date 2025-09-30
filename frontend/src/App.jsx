@@ -6,7 +6,6 @@
  * - Renders Home page
  */
 
-import React from "react";
 import { AppProvider } from "./context/AppContext";
 import Home from "./pages/Home";
 import "./styles/globals.css";

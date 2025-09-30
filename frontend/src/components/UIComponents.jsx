@@ -8,11 +8,10 @@
  * - StatNumber
  */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-// ------------------------
+
 // Header
-// ------------------------
 export const Header = ({ userName }) => (
     <header className="fixed top-0 left-0 right-0 w-full z-50 bg-[#090f52] h-16 flex justify-between items-center px-8 shadow-md">
         <div className="text-2xl font-bold text-[#ffd700] font-playfair">STAR Library</div>
@@ -20,9 +19,8 @@ export const Header = ({ userName }) => (
     </header>
 );
 
-// ------------------------
+
 // StatCard
-// ------------------------
 export const StatCard = ({ title, icon, children, className = '' }) => (
     <div className={`bg-white/85 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg p-6 ${className}`}>
         <div className="flex items-center mb-4">
@@ -33,9 +31,8 @@ export const StatCard = ({ title, icon, children, className = '' }) => (
     </div>
 );
 
-// ------------------------
+
 // LoadingSpinner
-// ------------------------
 export const LoadingSpinner = ({ message = "Loading..." }) => (
     <div className="flex flex-col items-center justify-center p-8">
         <div className="spinner"></div>
@@ -43,9 +40,8 @@ export const LoadingSpinner = ({ message = "Loading..." }) => (
     </div>
 );
 
-// ------------------------
+
 // Animated StatNumber
-// ------------------------
 export const StatNumber = ({ value, duration = 1000 }) => {
     const [count, setCount] = useState(0);
 

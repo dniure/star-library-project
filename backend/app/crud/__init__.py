@@ -17,18 +17,27 @@ DEFAULT_TOP_AUTHORS_LIMIT = 3
 # Books CRUD Operations
 
 def get_books(db: Session, skip: int = 0, limit: int = 100) -> List[models.Book]:
-    """Fetch books with readers and author info, calculate readers_count."""
-    books = (
-        db.query(models.Book)
-        # Eagerly load the related readers and author info in a single query
-        .options(joinedload(models.Book.readers), joinedload(models.Book.author))
+    """Fetch books with author info and calculate readers_count in SQL."""
+    
+    books_data = (
+        db.query(
+            models.Book,
+            func.count(models.Reader.id).label('readers_count')
+        )
+        .options(joinedload(models.Book.author)) # Still eager load the Author object
+        .outerjoin(models.Book.readers)
+        .group_by(models.Book.id)
         .offset(skip)
         .limit(limit)
         .all()
     )
-    # Post-query: Calculate the virtual readers_count field
-    for b in books:
-        b.readers_count = len(b.readers)
+    
+    # Process results: Unpack the tuple and assign the calculated count
+    books = []
+    for book_model, readers_count in books_data:
+        book_model.readers_count = readers_count
+        books.append(book_model)
+        
     return books
 
 def get_most_popular_books(db: Session, limit: int = DEFAULT_POPULAR_BOOKS_LIMIT) -> List[models.Book]:
@@ -46,19 +55,34 @@ def get_most_popular_books(db: Session, limit: int = DEFAULT_POPULAR_BOOKS_LIMIT
     )
 
 # Authors CRUD Operations
-
 def get_authors(db: Session) -> List[models.Author]:
-    """Fetch authors with all their books and total readers count."""
-    authors = (
-        db.query(models.Author)
-        # Eagerly load books, and for each book, eagerly load its readers
-        .options(joinedload(models.Author.books).joinedload(models.Book.readers))
+    """Fetch authors with their total books and total readers count using SQL aggregation."""
+    
+    # Define a subquery for total readers (requires a few joins)
+    # The count will be associated with the Author object later.
+    total_readers_count = func.count(models.Reader.id).label('total_readers')
+
+    authors_data = (
+        db.query(
+            models.Author,
+            func.count(models.Book.id).label('books_count'),
+            total_readers_count
+        )
+        # Outer joins ensure authors with no books/readers are included
+        .outerjoin(models.Author.books)
+        .outerjoin(models.Book.readers)
+        .group_by(models.Author.id)
         .all()
-    )    
-    # Post-query: Calculate virtual fields based on loaded relationships
-    for author in authors:
-        author.books_count = len(author.books)
-        author.total_readers = sum(len(book.readers) for book in author.books)
+    )
+    
+    # Process results: The query returns tuples, map the counts back to the Author object.
+    authors = []
+    for author_model, books_count, total_readers in authors_data:
+        # Attach virtual fields to the Author model object
+        author_model.books_count = books_count
+        author_model.total_readers = total_readers
+        authors.append(author_model)
+
     return authors
 
 def get_most_popular_author(db: Session) -> Optional[models.Author]:
@@ -75,7 +99,6 @@ def get_most_popular_author(db: Session) -> Optional[models.Author]:
     )
 
 # Readers CRUD Operations
-
 def get_reader_by_id(db: Session, reader_id: int) -> Optional[models.Reader]:
     """Fetch a reader with their books read and the author details for those books."""
     return (
@@ -84,16 +107,6 @@ def get_reader_by_id(db: Session, reader_id: int) -> Optional[models.Reader]:
         .options(joinedload(models.Reader.books_read).joinedload(models.Book.author))
         .filter(models.Reader.id == reader_id)
         .first()
-    )
-
-def get_reader_books_count(db: Session, reader_id: int) -> int:
-    """Return total number of books read by a specific reader using a COUNT query."""
-    return (
-        db.query(models.Book)
-        # Join Book to Reader via the book_readers association table
-        .join(models.Book.readers)
-        .filter(models.Reader.id == reader_id)
-        .count()
     )
 
 def get_reader_top_authors(db: Session, reader_id: int, limit: int = DEFAULT_TOP_AUTHORS_LIMIT) -> List[models.Author]:
@@ -113,11 +126,13 @@ def get_reader_top_authors(db: Session, reader_id: int, limit: int = DEFAULT_TOP
 
 def get_reader_with_stats(db: Session, reader_id: int) -> Optional[models.Reader]:
     """Return reader object and attach calculated stats (books_read_count)."""
-    # Fetch the reader and their relationships first
+    
+    # get_reader_by_id already eagerly loads all books_read.
     reader = get_reader_by_id(db, reader_id)
+    
     if not reader:
         return None
     
-    # Calculate and attach the count as a temporary attribute
-    reader.books_read_count = get_reader_books_count(db, reader_id)
+    # Calculate the count from the eagerly loaded list..
+    reader.books_read_count = len(reader.books_read)
     return reader

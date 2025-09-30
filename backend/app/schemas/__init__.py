@@ -81,6 +81,6 @@ class DashboardStats(BaseModel):
     most_popular_books: List[Book]
     most_popular_author: Optional[Author] = None
     books_read: List[Book]
-    reader_top_authors: List[Author]
+    user_top_authors: List[Author]
 
     model_config = {"from_attributes": True}

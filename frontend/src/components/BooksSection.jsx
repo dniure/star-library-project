@@ -7,11 +7,7 @@
  * - BookModal: Show detailed book info
  */
 
-import React from "react";
-
-// ------------------------
 // Book Card Component
-// ------------------------
 export const BookCard = ({ book, onClick, className, style }) => {
     const stars = '⭐'.repeat(Math.round(book.rating || 4));
 
@@ -55,9 +51,8 @@ export const BookCard = ({ book, onClick, className, style }) => {
     );
 };
 
-// ------------------------
+
 // Book Grid Component
-// ------------------------
 export const BookGrid = ({ books, loading, onBookClick }) => {
     if (loading) return (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -79,9 +74,8 @@ export const BookGrid = ({ books, loading, onBookClick }) => {
     );
 };
 
-// ------------------------
+
 // Book Modal Component
-// ------------------------
 export const BookModal = ({ book, onClose }) => {
     if (!book) return null;
 

@@ -8,7 +8,7 @@
  * - Book modal for quick preview
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useDashboard } from "../hooks/useDashboard";
 import { Header, LoadingSpinner } from "../components/UIComponents";
 import { BookGrid, BookModal } from "../components/BooksSection";
@@ -18,9 +18,8 @@ export const Home = () => {
     const { dashboardData, loading, error } = useDashboard(1);
     const [selectedBook, setSelectedBook] = useState(null);
 
-    // ------------------------
+    
     // Loading / Error / Empty States
-    // ------------------------
     if (loading) return (
         <div className="flex items-center justify-center min-h-screen">
             <LoadingSpinner />
@@ -39,16 +38,25 @@ export const Home = () => {
         </div>
     );
 
-    // ------------------------
+    
     // Render Main Page
-    // ------------------------
     return (
         <div className="container mx-auto px-4 pt-20 pb-8">
             <Header userName="James" />
 
+            {/* Dashboard Header */}
+            <div className="glass no-hover p-6 rounded-xl mb-8">
+                <h1 className="text-3xl font-bold text-[#8f8100] mb-2">
+                    Your personal Reading Dashboard
+                </h1>
+                <p className="text-gray-600 text-lg">
+                    Track your journey through worlds of words.
+                </p>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 {/* Dashboard Container */}
-                <div className="lg:col-span-1 glass no-hover p-6 rounded-xl">
+                <div className="lg:col-span-1 no-hover p-6 rounded-xl">
                     <Dashboard data={dashboardData} />
                 </div>
 

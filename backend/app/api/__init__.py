@@ -21,6 +21,8 @@ from ..seed import seed_database
 
 # Configure logging
 logger = logging.getLogger(__name__)
+# Configure User Log In
+HARDCODED_READER_ID = 1 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -93,49 +95,60 @@ def health_check(db: Session = Depends(get_db)):
         "timestamp": "2024-01-01T00:00:00Z"
     }
 
-# Dashboard Route
-@app.get(
-    "/dashboard/{reader_id}", 
-    response_model=schemas.DashboardStats, 
-    tags=["Dashboard"],
-    summary="Get reader dashboard",
-    description="Fetch comprehensive dashboard statistics for a specific reader including popular books and reading insights."
-)
-def get_dashboard(reader_id: int, db: Session = Depends(get_db)):
-    """Fetch dashboard stats for a reader."""
-    # Validate reader_id is a positive integer
-    if reader_id <= 0:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Reader ID must be a positive integer"
-        )
+def get_current_user(db: Session = Depends(get_db)) -> models.Reader:
+    """
+    Simulates fetching the logged-in reader by hardcoding the ID.
+    """
+    reader = crud.get_reader_with_stats(db, HARDCODED_READER_ID)
     
-    reader = crud.get_reader_by_id(db, reader_id)
-    # Check if reader exists
-    if not reader:
+    if reader is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Reader with ID {reader_id} not found"
+            detail="Simulated reader not found. Please seed the database."
         )
+    return reader
 
+# Dashboard Route
+@app.get(
+    "/dashboard",
+    response_model=schemas.DashboardStats, 
+    tags=["Dashboard"],
+    summary="Get *logged-in* reader dashboard",
+    description="Fetch dashboard statistics for the currently logged-in user."
+)
+def get_dashboard(
+    current_reader: models.Reader = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    """Fetch dashboard stats for the current reader."""
+    
     try:
-        # Fetch necessary data from CRUD functions
         most_popular_books = crud.get_most_popular_books(db)
-        reader_top_authors = crud.get_reader_top_authors(db, reader_id)
-        
+        reader_top_authors = crud.get_reader_top_authors(db, current_reader.id)    
         most_popular_author = reader_top_authors[0] if reader_top_authors else None
 
-        # Explicitly construct the response schema (DashboardStats)
+
+        # --- CODE TO PRINT THE TOP THREE AUTHORS ---
+        print("\n--- Current Reader's Top Authors ---")
+        if not reader_top_authors:
+            print("No top authors found (reader has no reading history).")
+        else:
+            # Iterate through the list and print the name
+            for i, author in enumerate(reader_top_authors):
+                # We use i+1 for 1st, 2nd, 3rd place display
+                print(f"#{i+1}: {author.name}")
+        # -------------------------------------------
+                
         return schemas.DashboardStats(
-            reader_id=reader.id,
+            # Use data from the current_reader object
+            reader_id=current_reader.id, 
             most_popular_books=most_popular_books,
             most_popular_author=most_popular_author,
-            books_read=reader.books_read,
-            reader_top_authors=reader_top_authors
+            books_read=current_reader.books_read,
+            user_top_authors=reader_top_authors
         )
     except Exception as e:
-        # Log error with context before raising HTTPException
-        logger.error(f"Error fetching dashboard for reader {reader_id}: {e}")
+        logger.error(f"Error fetching dashboard for reader {current_reader.id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while fetching dashboard data"
@@ -197,34 +210,6 @@ def get_authors(db: Session = Depends(get_db)):
             detail="Internal server error while fetching authors"
         )
 
-# Reader Endpoint
-@app.get(
-    "/readers/{reader_id}", 
-    response_model=schemas.Reader, 
-    tags=["Readers"],
-    summary="Get reader by ID",
-    description="Fetch detailed information about a specific reader including their reading history."
-)
-def get_reader(reader_id: int, db: Session = Depends(get_db)):
-    """Fetch reader info along with books read count."""
-    # Validate reader_id
-    if reader_id <= 0:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Reader ID must be a positive integer"
-        )
-    
-    reader = crud.get_reader_with_stats(db, reader_id)
-    # Check if reader was found
-    if not reader:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Reader with ID {reader_id} not found"
-        )
-    
-    # Reader object already has computed stats attached
-    return reader
-
 # Exception Handlers
 @app.exception_handler(SQLAlchemyError)
 async def sqlalchemy_exception_handler(request, exc):
@@ -254,7 +239,7 @@ tags_metadata = [
     },
     {
         "name": "Dashboard", 
-        "description": "Reader dashboard and reading insights",
+        "description": "User-specific endpoints for the logged-in reader's personal dashboard and statistics.",
     },
     {
         "name": "Books",

@@ -66,8 +66,8 @@ class ApiService {
     }
   }
 
-  fetchDashboardData(readerId = 1) {
-    return this.request<DashboardStats>(`/dashboard/${readerId}`);
+  fetchDashboardData() {
+    return this.request<DashboardStats>(`/dashboard`);
   }
 
   fetchBooks(skip = 0, limit = 100) {
@@ -76,10 +76,6 @@ class ApiService {
 
   fetchAuthors() {
     return this.request<Author[]>("/authors/");
-  }
-
-  fetchReader(readerId: number) {
-    return this.request<Reader>(`/readers/${readerId}`);
   }
 }
 
