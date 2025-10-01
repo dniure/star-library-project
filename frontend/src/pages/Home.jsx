@@ -42,21 +42,17 @@ export const Home = () => {
     // Render Main Page
     return (
         <div className="container mx-auto px-4 pt-20 pb-8">
-            <Header userName="James" />
-
-            {/* Dashboard Header */}
-            <div className="glass no-hover p-6 rounded-xl mb-8">
-                <h1 className="text-3xl font-bold text-[#8f8100] mb-2">
-                    Your personal Reading Dashboard
-                </h1>
-                <p className="text-gray-600 text-lg">
-                    Track your journey through worlds of words.
-                </p>
-            </div>
+            <Header userName={dashboardData.reader_name} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 {/* Dashboard Container */}
-                <div className="lg:col-span-1 no-hover p-6 rounded-xl">
+                <div className="glass lg:col-span-1 no-hover p-6 rounded-xl">
+                    <h1 className="text-3xl font-bold text-[#8f8100] mb-2">
+                        Reading Dashboard
+                    </h1>
+                    <p className="text-gray-600 text-lg mb-4">
+                        Track your journey through worlds of words.
+                    </p>
                     <Dashboard data={dashboardData} />
                 </div>
 

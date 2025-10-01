@@ -44,6 +44,10 @@ const Dashboard = ({ data }) => {
                         <span className="font-semibold text-green-600">{data.user_books_read?.length || 0}</span>
                     </div>
                     <div className="flex justify-between">
+                        <span>Reading Streak:</span>
+                        <span>15 days</span>
+                    </div>
+                    <div className="flex justify-between">
                         <span>Avg Rating:</span>
                         <span className="font-semibold">⭐⭐⭐⭐☆</span>
                     </div>
@@ -55,8 +59,7 @@ const Dashboard = ({ data }) => {
                 <div className="space-y-2">
                     {data.user_top_authors?.map((author, index) => (
                         <div key={author.id} className="flex justify-between items-center">
-                            <span className="font-medium">{index + 1}. {author.name}</span>
-                            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{author.books_count || 0} books</span>
+                            <span className="font-medium">{index + 1}. {author.name} ({author.books_count || 0})</span>
                         </div>
                     )) || <p className="text-gray-500">No authors found</p>}
                 </div>

@@ -1,0 +1,88 @@
+// frontend/src/services/__tests__/api.test.js
+import { apiService, ApiError } from '../api';
+import { mockDashboardData, mockBook, mockAuthor } from '../../__tests__/test-utils';
+
+// Mock fetch globally
+global.fetch = jest.fn();
+
+describe('ApiService', () => {
+  beforeEach(() => {
+    fetch.mockClear();
+  });
+
+  describe('fetchDashboardData', () => {
+    it('should fetch dashboard data successfully', async () => {
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockDashboardData)
+      };
+      fetch.mockResolvedValue(mockResponse);
+
+      const result = await apiService.fetchDashboardData();
+
+      expect(fetch).toHaveBeenCalledWith(
+        'http://localhost:8000/dashboardData',
+        expect.objectContaining({
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        })
+      );
+      expect(result).toEqual(mockDashboardData);
+    });
+
+    it('should handle HTTP errors', async () => {
+      const mockResponse = {
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error'
+      };
+      fetch.mockResolvedValue(mockResponse);
+
+      await expect(apiService.fetchDashboardData()).rejects.toThrow(ApiError);
+    });
+
+    it('should handle network errors', async () => {
+      fetch.mockRejectedValue(new Error('Network error'));
+
+      await expect(apiService.fetchDashboardData()).rejects.toThrow(ApiError);
+    });
+
+    it('should handle timeout', async () => {
+      fetch.mockImplementation(() => new Promise(resolve => 
+        setTimeout(() => resolve({ ok: true }), 15000)
+      ));
+
+      await expect(apiService.fetchDashboardData()).rejects.toThrow('Request timeout');
+    });
+  });
+
+  describe('fetchBooks', () => {
+    it('should fetch books with pagination', async () => {
+      const mockBooks = [mockBook];
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockBooks)
+      };
+      fetch.mockResolvedValue(mockResponse);
+
+      const result = await apiService.fetchBooks(10, 20);
+
+      expect(fetch).toHaveBeenCalledWith(
+        'http://localhost:8000/books/?skip=10&limit=20',
+        expect.any(Object)
+      );
+      expect(result).toEqual(mockBooks);
+    });
+  });
+
+  describe('error handling', () => {
+    it('should create ApiError with proper properties', () => {
+      const error = new ApiError('Test error', 404, new Error('Original error'));
+      
+      expect(error.message).toBe('Test error');
+      expect(error.status).toBe(404);
+      expect(error.originalError).toBeInstanceOf(Error);
+      expect(error.name).toBe('ApiError');
+    });
+  });
+});
