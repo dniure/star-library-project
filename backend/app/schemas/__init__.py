@@ -65,6 +65,7 @@ class Reader(ReaderBase):
 class DashboardData(BaseModel):
     """Comprehensive data schema for reader dashboard."""
     reader_id: int
+    reader_name: str
     most_popular_books: List[Book]  # Community trending books
     most_popular_author: Optional[Author] = None  # Top author by readership
     user_books_read: List[Book]  # Reader's personal reading history

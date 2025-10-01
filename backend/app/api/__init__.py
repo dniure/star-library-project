@@ -106,6 +106,7 @@ async def get_dashboard(
     try:
         return schemas.DashboardData(
             reader_id=current_reader.id,
+            reader_name=current_reader.name,
             most_popular_books=crud.get_most_popular_books(db),
             most_popular_author=crud.get_most_popular_author(db),
             user_books_read=current_reader.books_read,

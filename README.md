@@ -18,22 +18,22 @@ star-library-project/
 │   │   ├── crud/         # Database CRUD operations
 │   │   ├── models/       # SQLAlchemy models
 │   │   ├── schemas/      # Pydantic schemas
-│   │   ├── main.py       # FastAPI entrypoint
-│   │   └── db.py         # Database connection setup
+│   │   ├── database.py   # Database connection setup
+│   │   └── seed.py       # Database Seeding
 │   ├── tests/            # Backend tests
 │   └── requirements.txt  # Backend dependencies
 │
 │── frontend/
 │   ├── public/           # Static assets
 │   └── src/
-│       ├── components/   # UI components
-│       ├── context/      # React context
-│       ├── hooks/        # Custom hooks
-│       ├── pages/        # Page components
-│       ├── services/     # API integration (axios)
-│       ├── styles/       # Styling
-│       └── utils/        # Utility functions
-│
+│   │   ├── components/   # UI components
+│   │   ├── context/      # React context
+│   │   ├── hooks/        # Custom hooks
+│   │   ├── pages/        # Page components
+│   │   ├── services/     # API integration (axios)
+│   │   ├── styles/       # Styling
+│   │   └── utils/        # Utility functions
+│   ├── tests/ 
 └── README.md
 
 ```
